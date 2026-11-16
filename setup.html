@@ -1,15 +1,15 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>ตั้งรหัสทีม</title>
 <style>body{margin:0;background:#F2F4F7;font-family:system-ui,"Noto Sans Thai",sans-serif}.bx{max-width:380px;margin:60px auto;background:#fff;border-radius:16px;padding:28px;box-shadow:0 10px 40px rgba(16,24,40,.12)}label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}input{width:100%;box-sizing:border-box;font-size:16px;padding:11px;border:1px solid #D0D5DD;border-radius:10px}button{margin-top:16px;width:100%;font-weight:700;padding:12px;border:0;border-radius:10px;background:#C54826;color:#fff;font-size:15px}#m{margin-top:12px;font-weight:600;font-size:14px}p{color:#475467;font-size:14px}</style></head><body>
-<form class="bx" id="f" autocomplete="off"><h2 style="margin:0">ตั้งรหัสทีม HeartWork</h2><p>รหัสนี้ใช้เปิดแดชบอร์ด ลงนัด และนำเข้าไฟล์ · อย่างน้อย 10 ตัวอักษร · ระบบไม่ส่งตัวรหัสไปที่ใด</p>
+<form class="bx" id="f" autocomplete="off"><h2 style="margin:0">ตั้งรหัสทีม HeartWork</h2><p>รหัสนี้ใช้เปิดแดชบอร์ด ลงนัด และนำเข้าไฟล์ · อย่างน้อย 10 ตัวอักษร · ตัวรหัสไม่ถูกส่งไปที่ใด · หน้านี้สร้างโค้ดสำหรับส่งให้ Claude ตั้งค่าระบบ</p>
 <label>รหัสทีม</label><input type="password" id="a" autocomplete="new-password"><label>ยืนยันรหัสทีม</label><input type="password" id="b" autocomplete="new-password">
-<button type="submit">บันทึกรหัส</button><div id="m"></div></form>
+<button type="submit">บันทึกรหัส</button><div id="m"></div><textarea id="c" hidden readonly style="width:100%;height:90px;margin-top:10px;font:12px monospace"></textarea><button type="button" id="cp" hidden onclick="var c=document.getElementById('c');c.select();navigator.clipboard&&navigator.clipboard.writeText(c.value);this.textContent='คัดลอกแล้ว ✓'">คัดลอกโค้ด</button></form>
 <script>
 var E=new TextEncoder(),S=crypto.subtle;function hex(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return('0'+x.toString(16)).slice(-2)}).join('')}
 function b64(u){return btoa(String.fromCharCode.apply(null,new Uint8Array(u)))}
 document.getElementById('f').addEventListener('submit',function(e){e.preventDefault();var a=document.getElementById('a').value,b=document.getElementById('b').value,m=document.getElementById('m');
- if(!window.__K){m.textContent='ยังไม่พร้อม · รอ Claude สักครู่';return}if(a.length<10){m.textContent='รหัสต้องมีอย่างน้อย 10 ตัวอักษร';return}if(a!==b){m.textContent='รหัสสองช่องไม่ตรงกัน';return}
- var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),iter=310000,K=new Uint8Array(window.__K.match(/../g).map(function(h){return parseInt(h,16)}));
+ if(a.length<10){m.textContent='รหัสต้องมีอย่างน้อย 10 ตัวอักษร';return}if(a!==b){m.textContent='รหัสสองช่องไม่ตรงกัน';return}
+ var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),iter=310000,K=crypto.getRandomValues(new Uint8Array(32));
  S.importKey('raw',E.encode(a),'PBKDF2',false,['deriveKey']).then(function(k){return S.deriveKey({name:'PBKDF2',salt:salt,iterations:iter,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt'])})
  .then(function(w){return Promise.all([S.encrypt({name:'AES-GCM',iv:iv},w,K),S.digest('SHA-256',E.encode('hw-fs|'+a))])})
- .then(function(r){window.__out={salt:b64(salt),iter:iter,iv:b64(iv),wk:b64(r[0]),path:hex(r[1])};window.__K=null;document.getElementById('a').value='';document.getElementById('b').value='';m.style.color='#067647';m.textContent='✓ บันทึกรหัสแล้ว · แจ้ง Claude ได้เลย'})});
+ .then(function(r){var o={salt:b64(salt),iter:iter,iv:b64(iv),wk:b64(r[0]),path:hex(r[1]),k:hex(K)};var c=document.getElementById('c');c.value='HW1:'+btoa(JSON.stringify(o));c.hidden=false;document.getElementById('cp').hidden=false;document.getElementById('a').value='';document.getElementById('b').value='';m.style.color='#067647';m.textContent='✓ สร้างรหัสแล้ว · กดคัดลอกโค้ดด้านล่าง แล้ววางในแชทกับ Claude (โค้ดนี้ไม่ใช่ตัวรหัส)'})});
 </script></body></html>
